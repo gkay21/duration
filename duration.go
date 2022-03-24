@@ -81,7 +81,7 @@ func (d Duration) HasTimePart() bool {
 	return d.TH > 0 || d.TM > 0 || d.TS > 0
 }
 
-// Shift returns a time.Time, shifted by the duration from the given start.
+// ShiftForward returns a time.Time, shifted forwards by the duration from the given start.
 //
 // NB: Shift uses time.AddDate for years, months, weeks, and days, and so
 // shares its limitations. In particular, shifting by months is not recommended
@@ -89,13 +89,38 @@ func (d Duration) HasTimePart() bool {
 // roll over, e.g. Aug 31 + P1M = Oct 1.
 //
 // Week and Day values will be combined as W*7 + D.
-func (d Duration) Shift(t time.Time) time.Time {
+func (d Duration) ShiftForward(t time.Time) time.Time {
 	if d.Y != 0 || d.M != 0 || d.W != 0 || d.D != 0 {
 		days := d.W*7 + d.D
 		t = t.AddDate(d.Y, d.M, days)
 	}
 	t = t.Add(d.timeDuration())
 	return t
+}
+
+// ShiftBackward returns a time.Time, shifted backwards by the duration from the given start.
+//
+// Week and Day values will be combined as W*7 + D.
+func (d Duration) ShiftBackward(t time.Time) time.Time {
+	d = d.negate()
+	if d.Y != 0 || d.M != 0 || d.W != 0 || d.D != 0 {
+		days := d.W*7 + d.D
+		t = t.AddDate(d.Y, d.M, days)
+	}
+	t = t.Add(d.timeDuration())
+	return t
+}
+
+func (d Duration) negate() Duration {
+	return Duration{
+		Y:  -d.Y,
+		M:  -d.M,
+		W:  -d.W,
+		D:  -d.D,
+		TH: -d.TH,
+		TM: -d.TM,
+		TS: -d.TS,
+	}
 }
 
 func (d Duration) timeDuration() time.Duration {
