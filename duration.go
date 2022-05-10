@@ -133,6 +133,18 @@ func (d Duration) timeDuration() time.Duration {
 
 var tmpl = template.Must(template.New("duration").Parse(`P{{if .Y}}{{.Y}}Y{{end}}{{if .M}}{{.M}}M{{end}}{{if .W}}{{.W}}W{{end}}{{if .D}}{{.D}}D{{end}}{{if .HasTimePart}}T{{end }}{{if .TH}}{{.TH}}H{{end}}{{if .TM}}{{.TM}}M{{end}}{{if .TS}}{{.TS}}S{{end}}`))
 
+// ToDays returns the duration as a number of days (rounded up).
+func (d Duration) ToDays() int {
+	rounded := d.Y*365 + d.M*30 + d.W*7 + d.D
+
+	// Assume that part thereof is a day.
+	if d.HasTimePart() {
+		rounded++
+	}
+
+	return rounded
+}
+
 // String returns an ISO8601-ish representation of the duration.
 func (d Duration) String() string {
 	var s bytes.Buffer

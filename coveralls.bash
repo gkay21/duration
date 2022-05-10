@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 
-if ! type -P gover
-then
-	echo gover missing: go get github.com/modocache/gover
-	exit 1
-fi
+bad() {
+  ret=$1
+  shift
+  echo "$(red "● failed:")" "$@"
+  exit $ret
+}
 
-if ! type -P goveralls
-then
-	echo goveralls missing: go get github.com/mattn/goveralls
-	exit 1
-fi
+cmd_exists() {
+  type "$1" >/dev/null 2>&1
+}
+
+cmd_exists gover || bad 1 "gover missing: go install github.com/modocache/gover"
+cmd_exists goveralls || bad 1 "goveralls missing: go install github.com/mattn/goveralls"
 
 if [[ "$COVERALLS_TOKEN" == "" ]]
 then
@@ -21,5 +23,5 @@ fi
 go test -covermode count -coverprofile coverage.coverprofile
 
 gover
-goveralls -coverprofile gover.coverprofile -service travis-ci -repotoken $COVERALLS_TOKEN
+goveralls -coverprofile gover.coverprofile -repotoken $COVERALLS_TOKEN
 find . -name '*.coverprofile' -delete

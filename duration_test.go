@@ -143,6 +143,27 @@ func TestCanParse(t *testing.T) {
 	}
 }
 
+func TestToDays(t *testing.T) {
+	cases := []struct {
+		from duration.Duration
+		want int
+	}{
+		{duration.Duration{Y: 1}, 365},
+		{duration.Duration{M: 1}, 30},
+		{duration.Duration{W: 1}, 7},
+		{duration.Duration{D: 1}, 1},
+		{duration.Duration{Y: 1, M: 1, W: 1, D: 1}, 403},
+		{duration.Duration{Y: 2, M: 1, W: 2, D: 10, TH: 1, TM: 10, TS: 6}, 785},
+	}
+
+	for k, c := range cases {
+		got := c.from.ToDays()
+		if c.want != got {
+			t.Fatalf("Case %d: want=%+v, got=%+v", k, c.want, got)
+		}
+	}
+}
+
 func TestCanRejectBadString(t *testing.T) {
 	cases := []string{
 		"",
